@@ -9,7 +9,7 @@ if (isset($_GET["url"]) && !empty($_GET["url"])) {
 
     $details["title"] = $all_details->title;
     $details["thumbnail"] = $all_details->thumbnail;
-
+    $details["duration"] = $all_details->duration;
     $all_formats = $all_details->formats;
 
     // extract formats
