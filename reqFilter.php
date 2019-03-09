@@ -20,7 +20,7 @@ function get_client_ip() {
 
 $ip = get_client_ip();
 
-if ($ip !== "212.18.237.75") {
-	exit("fuck off!");
+if ($ip !== "212.18.237.74") {
+	exit($ip);
 }
 ?>
