@@ -1,5 +1,6 @@
 <?php
 header('Access-Control-Allow-Origin: *');
+require_once("reqFilter.php");
 if (isset($_GET["url"]) && !empty($_GET["url"]) && isset($_GET["code"]) && !empty($_GET["code"])) {
     $url = trim($_GET["url"]);
     $code = trim($_GET["code"]);

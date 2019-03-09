@@ -1,5 +1,6 @@
 <?php
 header('Access-Control-Allow-Origin: *');
+require_once("reqFilter.php");
 if (isset($_GET["url"]) && !empty($_GET["url"])) {
     $url = trim($_GET["url"]);
     $output = shell_exec("./info.sh $url");
