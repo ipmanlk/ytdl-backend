@@ -13,10 +13,25 @@ if (isset($_GET["url"]) && !empty($_GET["url"])) {
     // check if video info is cached
     $videoInfo = getVideoInfoFromCache($url_hash);
     if ($videoInfo == false) {
+        // check if video permissions are good
+
         $videoInfo = getVideoInfo($url);
+
+        $downloadable = $videoInfo["checkurl"];
+        
+        unset($videoInfo["checkurl"]);
+
+        if ($downloadable) {
+            $videoInfo["status"] = true;
+        } else {
+            $videoInfo["status"] = false;
+        }
+        
+        // create cache
         if ($videoInfo["title"] !== null) {
             createCache($url_hash, $videoInfo);
         }
+
     }
 
     echo json_encode($videoInfo);
@@ -68,9 +83,12 @@ function getVideoInfo($url)
     $details["thumbnail"] = $all_details->thumbnail;
     $details["duration"] = $all_details->duration;
     $all_formats = $all_details->formats;
+    // store weather video is downlodable or not
+    $details["checkurl"]  = true;
 
     // extract formats
     $formats = array();
+    
     foreach ($all_formats as $f) {
         if ($f->acodec !== "none" || $f->format_note == "DASH audio") {
             if (!$f->filesize) {
@@ -85,6 +103,9 @@ function getVideoInfo($url)
                 "url" => $f->url,
                 "tbr" => $f->tbr,
             );
+
+            // url for checking remote file exists / permissions
+            $details["checkurl"] = $details["checkurl"]  && remoteFileExists($f->url);
         }
     }
 
@@ -92,3 +113,31 @@ function getVideoInfo($url)
 
     return ($details);
 }
+
+
+function remoteFileExists($url) {
+    $curl = curl_init($url);
+
+    //don't fetch the actual page, you only want to check the connection is ok
+    curl_setopt($curl, CURLOPT_NOBODY, true);
+
+    //do request
+    $result = curl_exec($curl);
+
+    $ret = false;
+
+    //if request did not fail
+    if ($result !== false) {
+        //if request was ok, check response code
+        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);  
+
+        if ($statusCode == 200) {
+            $ret = true;   
+        }
+    }
+
+    curl_close($curl);
+
+    return $ret;
+}
+
