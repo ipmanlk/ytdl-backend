@@ -88,25 +88,29 @@ function getVideoInfo($url)
 
     // extract formats
     $formats = array();
-    
-    foreach ($all_formats as $f) {
-        if ($f->acodec !== "none" || $f->format_note == "DASH audio") {
-            if (!$f->filesize) {
-                $filesize = "best";
-            } else {
-                $filesize = $f->filesize;
-            }
-            $formats[$f->format_id] = array(
-                "format" => $f->format,
-                "ext" => $f->ext,
-                "filesize" => $filesize,
-                "url" => $f->url,
-                "tbr" => $f->tbr,
-            );
 
-            // url for checking remote file exists / permissions
-            $details["checkurl"] = $details["checkurl"]  && remoteFileExists($f->url);
+
+    foreach ($all_formats as $f) {
+        if (!$f->filesize) {
+            $filesize = "best";
+        } else {
+            $filesize = $f->filesize;
         }
+
+        if (($f->acodec == "none" || $f->format_note !== "DASH audio")) {
+            $f->format_id = $f->format_id . "~251";
+        }    
+
+        $formats[$f->format_id] = array(
+            "format" => $f->format,
+            "ext" => $f->ext,
+            "filesize" => $filesize,
+            "url" => $f->url,
+            "tbr" => $f->tbr,
+        );
+
+        // url for checking remote file exists / permissions
+        $details["checkurl"] = $details["checkurl"]  && remoteFileExists($f->url);
     }
 
     $details["formats"] = $formats;
